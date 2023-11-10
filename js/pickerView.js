@@ -7,6 +7,23 @@
 'use strict';
 
 ;(function(window){
+    var getDays = function(year, month) {
+        var result = [];
+        var days = 31;
+        var smallMonths = [4, 6, 9, 11];
+        var isLeapYear = function(y) { return (y % 4 === 0 && y % 100 !== 0 || y % 400 === 0); }
+        year = parseInt(year);
+        month = parseInt(month);
+        if (month === 2) {
+            isLeapYear(year) ? (days = 29) : (days = 28);
+        } else if (smallMonths.indexOf(month) > -1) {
+            days = 30;
+        }
+        for (var i = 0; i < days; i++) { 
+            result.push(i + 1 + '日');
+        }
+        return result;
+    }
     var ObjToArray = function(obj) {
         if(!obj) return [];
         if(Array.isArray(obj)) return obj;
@@ -22,8 +39,14 @@
 	var PickerView = function(opts) {
 			// 参数存起来
 			this.pickerOpts = opts;
-            this.pickerOpts.defaultCols = opts.initData();
-            this.pickerOpts.cols = opts.initData();
+            if(opts.type !== 'date') {
+                this.pickerOpts.defaultCols = opts.initData();
+                this.pickerOpts.cols = opts.initData();
+            } else {
+                // 日期检测
+                this.checkDate();
+            }
+            
 			// 选择器前缀
 	    	this.prefix = '_picker-' + new Date().getTime();
 	    	// 每一项的高度
@@ -36,7 +59,7 @@
 				curY: 0,
 				itemStartY: 0
             };
-
+            
 	    	// 生成选择器Dom结构
 	    	this.createPickerDom();
 
@@ -78,7 +101,7 @@
 	                // 获取每一个当前选中值 没有的话默认第一个
 	                for (var i = 0; i < _this.pickerOpts.cols.length; i++) {
                         var val = _this.pickerOpts.cols[i].curVal !== undefined ? _this.pickerOpts.cols[i].curVal : _this.pickerOpts.cols[i].values[0];
-                        values.push(val);
+                        values.push(_this.pickerOpts.type === 'date' ? parseInt(val.substr(0, val.length - 1)) : val);
 	                }
 	                _this.pickerOpts.onConfirm(values);
 				}
@@ -130,11 +153,18 @@
                         _this.pickerOpts.cols[index].curVal = _this.pickerOpts.cols[index].values[curIndex];
                         _this.col_list[index].classList.add('animate');
 	                    _this.col_list[index].setAttribute('style', '-webkit-transform:translate3d(0, ' + (3 - curIndex) * _this.itemHeight+'px, 0);transform:translate3d(0, ' + (3 - curIndex) * _this.itemHeight + 'px, 0);');
-                        // 选中事件回调
-                        for (let i = index+1; i< _this.pickerOpts.cols.length;i++) {
-                            _this.updateCol(i,_this.pickerOpts.cols[i])
+                        if (_this.pickerOpts.type === 'date' && (index === 1 || index === 0 && _this.pickerOpts.cols[1].curVal === '2月')) {
+                            var year = _this.pickerOpts.cols[0].curVal;
+                            var month = _this.pickerOpts.cols[1].curVal;
+                            _this.updateCol(2, {
+                                values: getDays(year.substr(0, year.length - 1), month.substr(0, month.length - 1))
+                            });
+                        } else if(_this.pickerOpts.type !== 'date') {
+                            // 选中事件回调
+                            for (let i = index+1; i< _this.pickerOpts.cols.length;i++) {
+                                _this.updateCol(i,_this.pickerOpts.cols[i])
+                            }
                         }
-                        
 						if (typeof _this.pickerOpts.onSelected === 'function') {
                             var val = _this.pickerOpts.cols[index].curVal;
 	                        _this.pickerOpts.onSelected(index, _this.pickerOpts.cols[index].curIndex, val);
@@ -144,14 +174,39 @@
 				}
 			}
         },
-        
+        // 日期类型检测
+        checkDate: function() {
+            var opts = this.pickerOpts;
+            if (!opts.type || opts.type !== 'date') return;
+            var start = opts.start || 1990;
+            var end = opts.end || new Date().getFullYear();
+            var years = [], months = [];
+            var curYear = opts.curYear || start, curMonth = opts.curMonth || 1;
+            for (var i = start; i <= end; i++) {
+                years.push(i + '年');
+            }
+            for (var j = 0; j < 12; j++) {
+                months.push(j + 1 + '月');
+            }
+            this.pickerOpts.cols = [
+                { values: years, curVal: curYear + '年' }, 
+                { values: months, curVal: curMonth + '月' },
+                { values: getDays(curYear, curMonth), curVal: '1日' }
+            ];
+        },
 	    // 创建选择器的Dom结构
 	    createPickerDom: function() {
             var opts = this.pickerOpts;
 			var mainDom = '';
-			for (var i = 0; i < opts.cols.length; i++) {
-				mainDom += '<div class="_picker-col">' + this.setOptions(i) + '</div>';
-			}
+            if (this.pickerOpts.type === 'date') {
+                for (var i = 0; i < opts.cols.length; i++) {
+                    mainDom += '<div class="_picker-col">' + this.setOptionsDate(opts.cols[i]) + '</div>';
+                }
+            } else {
+                for (var i = 0; i < opts.cols.length; i++) {
+                    mainDom += '<div class="_picker-col">' + this.setOptions(i) + '</div>';
+                }
+            }
             var dom = '<div class="_picker-container hide ' + this.prefix + '">' +
                             '<div class="_picker-mask"></div>' +
 							'<div class="_picker-wrapper">' +
@@ -167,13 +222,20 @@
             wrapper.innerHTML = dom;
 			document.body.appendChild(wrapper);
 		},
+        setOptionsDate: function(col) {
+            this.initDateCol(col);
+            var dom  = '<ul class="_picker-data-list" style="-webkit-transform:translate3d(0, ' + (3 - col.curIndex) * this.itemHeight + 'px, 0);transform:translate3d(0, ' + (3 - col.curIndex) * this.itemHeight + 'px, 0)">';
+            for (var i = 0; i < col.values.length; i++) {
+                dom += '<li>' + col.values[i] + '</li>';
+            }
+            return dom + '</ul>';
+        },
 		// 设置选择器里的列内容
 		setOptions: function(curIndex) {
-            console.log(curIndex, 'curIndex');  
+            
             if (curIndex-1>=0) {
                 const parent = this.pickerOpts.cols[curIndex-1];
                 const parentSelectVal = parent.curVal;
-                console.log(parentSelectVal, parent)
                 const parentSelectValue = parentSelectVal.value.toString().replace(/0{1,}$/g,'');
                 const newVal = ObjToArray(this.pickerOpts.defaultCols[curIndex].values).filter(item => {
                     return item.value.indexOf(parentSelectValue) === 0;
@@ -182,7 +244,6 @@
                 
             }
             this.initCol(this.pickerOpts.cols[curIndex]);
-            console.log(this.pickerOpts.cols[curIndex].values, 'sssss');
 			var dom  = '<ul class="_picker-data-list" style="-webkit-transform:translate3d(0, ' + (3 - this.pickerOpts.cols[curIndex].curIndex) * this.itemHeight + 'px, 0);transform:translate3d(0, ' + (3 - this.pickerOpts.cols[curIndex].curIndex) * this.itemHeight + 'px, 0)">';
 			for (var i = 0; i < this.pickerOpts.cols[curIndex].values.length; i++) {
 				dom += '<li>' + this.pickerOpts.cols[curIndex].values[i].label + '</li>';
@@ -195,12 +256,30 @@
             if (!col.values.length) return;
             col.curVal = col.values[0];
             col.curIndex = 0;
-            console.log(col, 'init')
+        },
+        initDateCol: function(col) {
+            if (!col.values.length) return;
+            if (col.curVal) {
+				var temp = col.values.indexOf(col.curVal);
+				if (temp === -1) {
+	                col.curVal = col.values[0];
+	                col.curIndex = 0;
+				} else {
+	                col.curIndex = temp;
+				}
+			} else {
+	            // 没有当前项 默认第一个
+	            col.curVal = col.values[0];
+	            col.curIndex = 0;
+			}
         },
 		// 更新列内容
 		updateCol: function(colIndex,col) {
-            console.log('ssss2333');
-			this.cols[colIndex].innerHTML = this.setOptions(colIndex);
+            if (this.pickerOpts.type === 'date') {
+                this.cols[colIndex].innerHTML =  this.setOptionsDate(col);
+            } else {
+                this.cols[colIndex].innerHTML = this.setOptions(colIndex);
+            }
 	        // 更新pickerOpts
 	        this.pickerOpts.cols[colIndex] = col;
 	        // 更新col list
