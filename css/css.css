@@ -1,0 +1,158 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+ul{
+    list-style: none;
+}
+body, html {
+    background: #f0f2f5;
+    background: url('../images/bg_img.png') no-repeat 100% 100%;
+    margin: 0 auto;
+    border-radius: 10px;
+    background-size: 100% 100%;
+    background-color: #020202;
+}
+.content{
+    width: 20rem;
+    height: 46rem;
+    text-align: center;
+}
+
+.header{
+    height: 80%;
+    margin: auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.header img{
+    width: 7rem;
+    height: 7rem;
+    border-radius: 100%;
+    margin-bottom: -2.5rem;
+    border: solid 1px #fff;
+}
+.header .headerInfo {
+    width: 90%;
+    height: 80%;
+    margin: auto;
+    border-radius: 10px;
+    color: #fff;
+    background: url('../images/pop_bg.png') no-repeat 100% 100%;
+    background-size: 100% 100%;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.headerInfo .info{
+    padding-top: 3rem;
+}
+
+.headerInfo .info .user{ 
+    background-image: url(../images/icon_user.png);
+    /*设置小图标*/ 
+
+    background-size: 25px 25px;
+    /*小图标的大小*/ 
+
+    background-position: 5px 4px;
+    /*小图标在input的位置*/ 
+
+    background-repeat: no-repeat;
+    /*背景小图标不重复*/ 
+   
+} 
+
+.headerInfo .info .phone{ 
+    background-image: url(../images/icon_phone.png);
+    background-size: 25px 25px;
+    background-position: 5px 4px;
+    background-repeat: no-repeat;
+}
+.headerInfo .info .certificate{ 
+    background-image: url(../images/icon_certificate.png);
+    background-size: 25px 25px;
+    background-position: 5px 4px;
+    background-repeat: no-repeat;
+} 
+.headerInfo .info .date{ 
+    background-image: url(../images/icon_date.png);
+    background-size: 25px 25px;
+    background-position: 5px 4px;
+    background-repeat: no-repeat;
+}
+.headerInfo .info .gender{ 
+    background-image: url(../images/icon_gender.png);
+    background-size: 25px 25px;
+    background-position: 5px 4px;
+    background-repeat: no-repeat;
+}
+.headerInfo .info .city{ 
+    background: #181818;
+    background-image: url(../images/icon_position.png);
+    background-size: 25px 25px;
+    background-position: 5px 4px;
+    background-repeat: no-repeat;
+    width: 90%;
+    height: 2.6rem;
+    font-size: 16px;
+    color: #fff;
+    text-align: left;
+    border: none;
+    border-bottom: 1px solid #aaa;
+    outline:none;/* //清除select聚焦时候的边框颜色 */
+    text-indent: 38px;
+    margin: 0 auto;
+    line-height: 40px;
+}  
+
+.headerInfo .info .form-input{
+    line-height: 4rem;
+    width: 100%;
+}
+.headerInfo .info input{
+    width: 90%;
+    height: 2.6rem;
+    font-size: 16px;
+    color: #fff;
+    outline: none;/*关键代码*/
+    appearance:none;/*关键代码，css3的样式，必须使用*/
+    -moz-appearance:none; /* Firefox */
+    -webkit-appearance:none; /* Safari 和 Chrome */
+    background: #181818;
+    border: none;
+    border-bottom: 1px solid #aaa;
+    text-indent: 38px
+}
+.headerInfo .info select{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 90%;
+    height: 2.6rem;
+    font-size: 16px;
+    color: #fff;
+    background: #181818;
+    border: none;
+    border-bottom: 1px solid #aaa;
+    outline:none;/* //清除select聚焦时候的边框颜色 */
+    text-indent: 38px
+}
+
+.headerInfo .info .button{ 
+    background-image: url(../images/btn_bg_0.png);
+    background-size: 100% 100%;
+    width: 90%;
+    height: 2.8rem;
+    border: none;
+    font-size: 16px;
+    color: #fff;
+    border-radius: 8px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+} 
+
+
